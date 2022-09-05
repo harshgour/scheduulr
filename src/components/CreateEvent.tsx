@@ -1,13 +1,13 @@
-import React, { useContext } from "react";
 import { IoAdd } from "react-icons/io5";
-import GlobalContext from "../context/GlobalContext";
+import { useDispatch } from "react-redux";
+import { setShowEventModal } from "../reducers/restSlice";
 
 type Props = {};
 
 const CreateEvent = (props: Props) => {
-	const { setShowEventModal } = useContext(GlobalContext);
+	const dispatch = useDispatch();
 	const handleModal = () => {
-		setShowEventModal(true);
+		dispatch(setShowEventModal(true));
 	};
 	return (
 		<button

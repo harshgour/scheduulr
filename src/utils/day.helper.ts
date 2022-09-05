@@ -15,12 +15,12 @@ export const getMonth = (month = dayjs().month()) => {
 	return daysMatrix;
 };
 
-export const getWeek = (date = dayjs()) => {
+export const getWeek = (date = dayjs().valueOf()) => {
 	let currentDay = -1;
 
 	const daysArray = new Array(7).fill([]).map(() => {
 		currentDay++;
-		return dayjs(date).startOf("week").add(currentDay, "day");
+		return dayjs(date).startOf("week").add(currentDay, "day").valueOf();
 	});
 
 	return daysArray;

@@ -1,7 +1,11 @@
 import dayjs from "dayjs";
-import React, { useContext, useEffect, useState } from "react";
-import { EventPayload } from "../context/ContextWrapper";
-import GlobalContext from "../context/GlobalContext";
+import { SyntheticEvent, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { setDaySelected, setSelectedView } from "../reducers/calSlice";
+import { selectFilteredEvents, setSelectedEvent } from "../reducers/eventSlice";
+import { setShowEventModal } from "../reducers/restSlice";
+import { EventType } from "../types";
 
 type Props = {
 	day: dayjs.Dayjs;
@@ -9,18 +13,13 @@ type Props = {
 };
 
 const Day = (props: Props) => {
-	const [dayEvents, setDayEvents] = useState([]);
-
-	const {
-		setDaySelected,
-		setShowEventModal,
-		filteredEvents,
-		setSelectedEvent,
-	} = useContext(GlobalContext);
+	const filteredEvents = useSelector(selectFilteredEvents);
+	const [dayEvents, setDayEvents] = useState<EventType[]>(filteredEvents);
+	const dispatch = useDispatch();
 
 	useEffect(() => {
 		const events = filteredEvents.filter(
-			(evt: any) =>
+			(evt: EventType) =>
 				dayjs(evt.day).format("DD-MM-YY") ===
 				dayjs(props.day).format("DD-MM-YY"),
 		);
@@ -28,7 +27,7 @@ const Day = (props: Props) => {
 	}, [filteredEvents, props.day]);
 
 	const getCurrentDayClass = () => {
-		return props.day.format("DD-MM-YY") === dayjs().format("DD-MM-YY")
+		return dayjs(props.day).format("DD-MM-YY") === dayjs().format("DD-MM-YY")
 			? "bg-blue-600 text-white rounded-full w-7"
 			: "";
 	};
@@ -38,12 +37,18 @@ const Day = (props: Props) => {
 	};
 
 	const handleDayClick = (day: dayjs.Dayjs) => {
-		setDaySelected(day);
-		setShowEventModal(true);
+		dispatch(setDaySelected(day.valueOf()));
+		dispatch(setShowEventModal(true));
 	};
 
-	const handleEventClick = (event: EventPayload) => {
-		setSelectedEvent(event);
+	const handleEventClick = (event: EventType) => {
+		dispatch(setSelectedEvent(event));
+	};
+
+	const handleMoreClick = (e: SyntheticEvent) => {
+		e.stopPropagation();
+		dispatch(setDaySelected(props.day.valueOf()));
+		dispatch(setSelectedView("week"));
 	};
 
 	return (
@@ -51,22 +56,22 @@ const Day = (props: Props) => {
 			<header className='flex flex-col items-end'>
 				{props.rowIdx === 0 && (
 					<p className='text-sm self-center border-b w-full text-right p-2'>
-						{props.day.format("dd")}
+						{dayjs(props.day).format("dd")}
 					</p>
 				)}
 				<p
 					className={`text-sm p-1 mx-2 my-2 text-center ${getCurrentDayClass()}`}>
-					{props.day.format("DD")}
+					{dayjs(props.day).format("DD")}
 				</p>
 			</header>
 			<div
-				className='flex-1 cursor-pointer'
+				className='flex-1 cursor-pointer flex flex-col'
 				onClick={() => handleDayClick(props.day)}>
-				{dayEvents.slice(0, 3).map((event: EventPayload, idx) => {
+				{dayEvents.slice(0, 2).map((event: EventType, idx) => {
 					return (
 						<div
 							key={idx}
-							className={`p-1 mt-2 mx-3 text-white text-sm rounded mb-1 truncate ${getLabelColorClass(
+							className={`p-1 mt-1 mx-1 sm:mx-3 text-white text-sm rounded mb-1 truncate ${getLabelColorClass(
 								event.label,
 							)}`}
 							onClick={() => handleEventClick(event)}>
@@ -80,9 +85,11 @@ const Day = (props: Props) => {
 						</div>
 					);
 				})}
-				{dayEvents.length > 3 && (
-					<span className='rounded-full text-xs font-semibold text-gray-600 float-right mr-3 py-2'>
-						+{dayEvents.length - 3} more
+				{dayEvents.length > 2 && (
+					<span
+						className='rounded-full text-xs font-semibold self-center sm:self-end sm:mr-3 text-gray-600 py-2 hover:text-blue-500 hover:font-bold'
+						onClick={handleMoreClick}>
+						+{dayEvents.length - 2} more
 					</span>
 				)}
 			</div>

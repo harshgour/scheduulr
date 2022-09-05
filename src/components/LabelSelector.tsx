@@ -1,15 +1,13 @@
-import React, { useContext } from "react";
-import GlobalContext from "../context/GlobalContext";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { selectLabels, setLabels } from "../reducers/restSlice";
+import { LabelType } from "../types";
 
 type Props = {};
 
-type LabelType = {
-	label: string;
-	checked: boolean | undefined;
-};
-
 const LabelSelector = (props: Props) => {
-	const { labels, updateLabel } = useContext(GlobalContext);
+	const labels = useSelector(selectLabels);
+	const dispatch = useDispatch();
 
 	return (
 		<div className='border-t mt-6'>
@@ -24,8 +22,16 @@ const LabelSelector = (props: Props) => {
 									checked={lbl.checked}
 									className={`form-checkbox h-5 w-5 rounded focus:ring-0 cursor-pointer`}
 									style={{ color: lbl.label }}
-									onChange={() =>
-										updateLabel({ label: lbl.label, checked: !lbl.checked })
+									onChange={(e) =>
+										dispatch(
+											setLabels(
+												labels.map((label: LabelType) =>
+													label.label === lbl.label
+														? { ...label, checked: !lbl.checked }
+														: label,
+												),
+											),
+										)
 									}
 								/>
 								<span className='ml-2 text-gray-700 capitalize'>

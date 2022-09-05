@@ -1,17 +1,25 @@
 import dayjs from "dayjs";
-import React, { useContext, useEffect, useState } from "react";
-import GlobalContext from "../../context/GlobalContext";
-import { getWeek } from "../../utils";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import {
+	selectCurrentWeek,
+	selectDaySelected,
+	setCurrentWeek,
+} from "../../reducers/calSlice";
+import { getWeek } from "../../utils/day.helper";
 import WeekDay from "../WeekDay";
 
-type Props = {};
-
-const WeekView = (props: Props) => {
-	const { currentWeek } = useContext(GlobalContext);
-
+const WeekView = () => {
+	const currentWeek = useSelector(selectCurrentWeek);
+	const daySelected = useSelector(selectDaySelected);
+	const dispatch = useDispatch();
+	useEffect(() => {
+		dispatch(setCurrentWeek(getWeek(daySelected)));
+	}, [daySelected]);
 	return (
 		<div className='w-full grid grid-cols-7'>
-			{currentWeek.map((day: any, idx: number) => {
+			{currentWeek.map((day: dayjs.Dayjs | number, idx: number) => {
 				return <WeekDay day={day} dayIdx={idx} key={idx} />;
 			})}
 		</div>

@@ -1,41 +1,39 @@
 import dayjs from "dayjs";
-import React, { SyntheticEvent, useContext, useEffect, useState } from "react";
-import { EventPayload } from "../context/ContextWrapper";
-import GlobalContext from "../context/GlobalContext";
+import React, { SyntheticEvent, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { setDaySelected, setSelectedTime } from "../reducers/calSlice";
+import { selectFilteredEvents, setSelectedEvent } from "../reducers/eventSlice";
+import { setShowEventModal } from "../reducers/restSlice";
+import { EventType } from "../types";
 
 type Props = {
-	day: dayjs.Dayjs;
+	day: dayjs.Dayjs | number;
 	dayIdx: number;
 };
 
 const WeekDay = (props: Props) => {
-	const [dayEvents, setDayEvents] = useState([]);
-
-	const {
-		setDaySelected,
-		setShowEventModal,
-		filteredEvents,
-		setSelectedEvent,
-		setSelectedTime,
-	} = useContext(GlobalContext);
+	const [dayEvents, setDayEvents] = useState<Array<any>>([]);
+	const filteredEvents = useSelector(selectFilteredEvents);
+	const dispatch = useDispatch();
 
 	useEffect(() => {
 		const events = filteredEvents.filter(
-			(evt: any) =>
+			(evt: EventType) =>
 				dayjs(evt.day).format("DD-MM-YY") ===
 				dayjs(props.day).format("DD-MM-YY"),
 		);
 		setDayEvents(events);
 	}, [filteredEvents, props.day]);
 
-	const getCurrentDateClass = (day: any) => {
-		return day.format("DD-MM-YY") === dayjs().format("DD-MM-YY")
+	const getCurrentDateClass = (day: number | dayjs.Dayjs) => {
+		return dayjs(day).format("DD-MM-YY") === dayjs().format("DD-MM-YY")
 			? "bg-blue-600 text-white rounded-full px-2 color-blue-600"
 			: "";
 	};
 
-	const getCurrentDayClass = (day: any) => {
-		return day.format("DD-MM-YY") === dayjs().format("DD-MM-YY")
+	const getCurrentDayClass = (day: number | dayjs.Dayjs) => {
+		return dayjs(day).format("DD-MM-YY") === dayjs().format("DD-MM-YY")
 			? "text-blue-600"
 			: "";
 	};
@@ -44,38 +42,38 @@ const WeekDay = (props: Props) => {
 		return `bg-${label}-500`;
 	};
 
-	const handleEventClick = (e: SyntheticEvent, event: EventPayload) => {
+	const handleEventClick = (e: SyntheticEvent, event: EventType) => {
 		e.stopPropagation();
-		setDaySelected(dayjs(event.day));
-		setShowEventModal(true);
-		setSelectedEvent(event);
+		dispatch(setDaySelected(dayjs(event.day).valueOf()));
+		dispatch(setShowEventModal(true));
+		dispatch(setSelectedEvent(event));
 	};
 
 	const handleDayTimeClick = (index: number) => {
 		if (
 			dayEvents.filter(
-				(item: any) =>
+				(item: EventType) =>
 					Number(item.time) === (index + 9 === 12 ? 12 : (index + 9) % 12),
 			).length
 		) {
 			return;
 		}
-		setDaySelected(dayjs(props.day));
-		setShowEventModal(true);
-		setSelectedTime(`${index + 9 === 12 ? 12 : (index + 9) % 12}`);
+		dispatch(setDaySelected(dayjs(props.day).valueOf()));
+		dispatch(setShowEventModal(true));
+		dispatch(setSelectedTime(`${index + 9 === 12 ? 12 : (index + 9) % 12}`));
 	};
 
 	return (
 		<div className='flex flex-col items-center justify-start'>
 			<div className='flex flex-col items-center w-full px-2 py-4 sm:px-6'>
 				<div className={`uppercase text-xs ${getCurrentDayClass(props.day)}`}>
-					{props.day.format("ddd")}
+					{dayjs(props.day).format("ddd")}
 				</div>
 				<div
 					className={`text-2xl w-12 h-12 flex items-center justify-center ${getCurrentDateClass(
 						props.day,
 					)}`}>
-					{props.day.format("D")}
+					{dayjs(props.day).format("D")}
 				</div>
 			</div>
 			<div className='flex-1 mt-4 w-full border-r'>
@@ -91,7 +89,7 @@ const WeekDay = (props: Props) => {
 									{index < 9 || index === 12 ? "PM" : "AM"}
 								</span>
 							)}
-							{dayEvents.map((event: EventPayload, idx) => {
+							{dayEvents.map((event: EventType, idx) => {
 								return (
 									Number(event.time) ===
 										(index + 9 === 12 ? 12 : (index + 9) % 12) && (

@@ -3,7 +3,6 @@ import React, {
 	ChangeEvent,
 	FormEvent,
 	SyntheticEvent,
-	useContext,
 	useEffect,
 	useState,
 } from "react";
@@ -16,7 +15,19 @@ import {
 	IoTrash,
 } from "react-icons/io5";
 import { MdDescription } from "react-icons/md";
-import GlobalContext from "../context/GlobalContext";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { selectDaySelected, selectSelectedTime } from "../reducers/calSlice";
+import {
+	deleteEvent,
+	pushEvent,
+	selectFilteredEvents,
+	selectSavedEvents,
+	selectSelectedEvent,
+	updateEvent,
+} from "../reducers/eventSlice";
+import { setShowEventModal } from "../reducers/restSlice";
+import { EventType, FormDataType } from "../types";
 
 type Props = {};
 
@@ -29,29 +40,21 @@ type FakeEventType = {
 
 const labelsClasses = ["indigo", "gray", "green", "blue", "red", "purple"];
 
-type FormDataType = {
-	title: string;
-	description: string;
-	contact: string;
-	selectedLabel: string;
-	time: string;
-};
-
 const times = ["9", "10", "11", "12", "1", "2", "3", "4", "5", "6", "7", "8"];
 
 const EventModal = (props: Props) => {
-	const {
-		setShowEventModal,
-		daySelected,
-		dispatchCalEvent,
-		selectedEvent,
-		filteredEvents,
-		selectedTime,
-	} = useContext(GlobalContext);
+	const daySelected = useSelector(selectDaySelected);
+	const selectedEvent = useSelector(selectSelectedEvent);
+	const savedEvents = useSelector(selectSavedEvents);
+	const selectedTime = useSelector(selectSelectedTime);
+	const dispatch = useDispatch();
 
 	const availTimes = () => {
-		const events = filteredEvents.map((evt: any) => {
-			if (dayjs(evt.day).format("DD-MM-YY") === daySelected.format("DD-MM-YY"))
+		const events = savedEvents.map((evt: EventType) => {
+			if (
+				dayjs(evt.day).format("DD-MM-YY") ===
+				dayjs(daySelected).format("DD-MM-YY")
+			)
 				return evt.time;
 		});
 		let availableTimes = times.filter((time) => !events.includes(time));
@@ -81,7 +84,6 @@ const EventModal = (props: Props) => {
 	) => {
 		const target = e.currentTarget;
 		const { name, value } = target;
-		console.log(name, value);
 		setFormData((prevFormData) => {
 			return {
 				...prevFormData,
@@ -102,15 +104,15 @@ const EventModal = (props: Props) => {
 		};
 
 		if (selectedEvent) {
-			dispatchCalEvent({ type: "update", payload: scheduledEvent });
+			dispatch(updateEvent(scheduledEvent));
 		} else {
-			dispatchCalEvent({ type: "push", payload: scheduledEvent });
+			dispatch(pushEvent(scheduledEvent));
 		}
-		setShowEventModal(false);
+		dispatch(setShowEventModal(false));
 	};
 	const handleEventDelete = (e: FormEvent) => {
-		dispatchCalEvent({ type: "delete", payload: selectedEvent });
-		setShowEventModal(false);
+		dispatch(deleteEvent(selectedEvent));
+		dispatch(setShowEventModal(false));
 	};
 	const getLabelColorClass = (label: string) => {
 		return `bg-${label}-500`;
@@ -119,7 +121,7 @@ const EventModal = (props: Props) => {
 	return (
 		<div
 			className='h-screen w-full fixed top-0 left-0 flex justify-center items-center bg-opacity-50 bg-gray-400 z-10'
-			onClick={() => setShowEventModal(false)}>
+			onClick={() => dispatch(setShowEventModal(false))}>
 			<form
 				className='bg-white rounded-lg shadow-2xl w-[90%] sm:w-3/5 lg:w-2/5 2xl:w-1/3'
 				onClick={handlePropagation}>
@@ -135,7 +137,7 @@ const EventModal = (props: Props) => {
 						)}
 						<span
 							className='text-gray-400 cursor-pointer text-xl'
-							onClick={() => setShowEventModal(false)}>
+							onClick={() => dispatch(setShowEventModal(false))}>
 							<IoClose />
 						</span>
 					</div>
@@ -157,7 +159,7 @@ const EventModal = (props: Props) => {
 						</span>
 						<div className='flex flex-col items-start sm:items-center sm:flex-row'>
 							<p className='text-slate-500 mr-4 sm:border-r-2 pr-4'>
-								{daySelected.format("dddd, MMMM DD")}
+								{dayjs(daySelected).format("dddd, MMMM DD")}
 							</p>
 							<div>
 								<span className='text-slate-500 mr-2'>Time:</span>

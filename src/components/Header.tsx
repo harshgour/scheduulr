@@ -1,58 +1,62 @@
 import dayjs from "dayjs";
-import { ChangeEvent, useContext } from "react";
+import { ChangeEvent } from "react";
 import { AiOutlineSchedule } from "react-icons/ai";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
-import GlobalContext from "../context/GlobalContext";
-import { getWeek } from "../utils";
+import { useDispatch, useSelector } from "react-redux";
+import {
+	nextMonth,
+	prevMonth,
+	selectCurrentWeek,
+	selectMonthIndex,
+	selectSelectedView,
+	setCurrentWeek,
+	setMonth,
+	setSelectedView,
+} from "../reducers/calSlice";
+import { getWeek } from "../utils/day.helper";
 
-type Props = {};
+const Header = () => {
+	const monthIndex = useSelector(selectMonthIndex);
+	const currentWeek = useSelector(selectCurrentWeek);
+	const selectedView = useSelector(selectSelectedView);
+	const dispatch = useDispatch();
 
-const Header = (props: Props) => {
-	const {
-		monthIndex,
-		currentWeek,
-		selectedView,
-		setMonthIndex,
-		setCurrentWeek,
-		setSelectedView,
-	} = useContext(GlobalContext);
-
-	const handleMonthChange = (operation: string) => {
-		switch (operation) {
-			case "prev":
-				setMonthIndex(monthIndex + -1);
-				break;
-			case "next":
-				setMonthIndex(monthIndex + 1);
-				break;
-		}
-	};
-	const handleWeekChange = (operation: string) => {
-		switch (operation) {
-			case "prev":
-				setCurrentWeek(getWeek(currentWeek[0].subtract(1, "day")));
-				break;
-			case "next":
-				setCurrentWeek(getWeek(currentWeek[6].add(1, "day")));
-				break;
-		}
-	};
 	const handleChange = (change: string) => {
-		switch (selectedView) {
-			case "week":
-				handleWeekChange(change);
+		switch (change) {
+			case "prev":
+				{
+					if (selectedView === "week") {
+						dispatch(
+							setCurrentWeek(
+								getWeek(dayjs(currentWeek[0]).subtract(1, "day").valueOf()),
+							),
+						);
+					} else {
+						dispatch(prevMonth({}));
+					}
+				}
 				break;
-			case "month":
-				handleMonthChange(change);
+			case "next":
+				{
+					if (selectedView === "week") {
+						dispatch(
+							setCurrentWeek(
+								getWeek(dayjs(currentWeek[6]).add(1, "day").valueOf()),
+							),
+						);
+					} else {
+						dispatch(nextMonth({}));
+					}
+				}
 				break;
 		}
 	};
 	const handleReset = () => {
-		setMonthIndex(dayjs().month());
-		setCurrentWeek(getWeek());
+		dispatch(setMonth(dayjs().month()));
+		dispatch(setCurrentWeek(getWeek()));
 	};
 	const handleViewChange = (e: ChangeEvent<HTMLSelectElement>) => {
-		setSelectedView(e.target.value);
+		dispatch(setSelectedView(e.target.value));
 		handleReset();
 	};
 
@@ -93,7 +97,9 @@ const Header = (props: Props) => {
 						{dayjs(
 							new Date(
 								dayjs().year(),
-								selectedView === "week" ? currentWeek[0].month() : monthIndex,
+								selectedView === "week"
+									? dayjs(currentWeek[0]).month()
+									: monthIndex,
 							),
 						).format("MMM YYYY")}
 					</h2>

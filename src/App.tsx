@@ -1,18 +1,77 @@
-import React, { useState, useContext, useEffect } from "react";
 import "./App.css";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
-import { getMonth } from "./utils";
-import GlobalContext from "./context/GlobalContext";
-import dayjs from "dayjs";
 import EventModal from "./components/EventModal";
 import MonthView from "./components/Views/MonthView";
 import WeekView from "./components/Views/WeekView";
+import { useSelector, useDispatch } from "react-redux";
+import { selectSelectedView, setSelectedTime } from "./reducers/calSlice";
+import {
+	selectLabels,
+	selectShowEventModal,
+	setLabels,
+} from "./reducers/restSlice";
+import { useEffect, useMemo } from "react";
+import {
+	selectSavedEvents,
+	setFilteredEvents,
+	setSelectedEvent,
+} from "./reducers/eventSlice";
+import { EventType, LabelType } from "./types";
 
 type Props = {};
 
 const App = (props: Props) => {
-	const { showEventModal, selectedView } = useContext(GlobalContext);
+	const showEventModal = useSelector(selectShowEventModal);
+	const selectedView = useSelector(selectSelectedView);
+	const savedEvents = useSelector(selectSavedEvents);
+	const labels = useSelector(selectLabels);
+
+	const dispatch = useDispatch();
+
+	const filteredEvents = useMemo(() => {
+		return savedEvents.filter((event: EventType) =>
+			labels
+				.filter((lbl: LabelType) => lbl.checked)
+				.map((lbl: LabelType) => lbl.label)
+				.includes(event.label),
+		);
+	}, [savedEvents, labels]);
+
+	useEffect(() => {
+		dispatch(setFilteredEvents(filteredEvents));
+	}, [filteredEvents]);
+
+	useEffect(() => {
+		if (!showEventModal) {
+			dispatch(setSelectedEvent(null));
+			dispatch(setSelectedTime(null));
+		}
+	}, [showEventModal]);
+
+	useEffect(() => {
+		if (savedEvents) {
+			localStorage.setItem("savedEvents", JSON.stringify(savedEvents));
+		}
+	}, [savedEvents]);
+
+	useEffect(() => {
+		dispatch(
+			setLabels(
+				Array.from(new Set(savedEvents.map((evt: EventType) => evt.label))).map(
+					(label) => {
+						const currentLabel = labels.find(
+							(lbl: LabelType) => lbl.label === label,
+						);
+						return {
+							label,
+							checked: currentLabel?.checked || true,
+						};
+					},
+				),
+			),
+		);
+	}, [savedEvents]);
 
 	return (
 		<>
