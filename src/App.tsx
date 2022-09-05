@@ -76,7 +76,7 @@ const App = (props: Props) => {
 	return (
 		<>
 			{showEventModal && <EventModal />}
-			<div className='min-h-screen flex'>
+			<div className='min-h-screen flex select-none'>
 				<Sidebar />
 				<div className='flex flex-1 flex-col'>
 					<Header />
