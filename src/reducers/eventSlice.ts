@@ -32,6 +32,10 @@ const eventSlice = createSlice({
 		setFilteredEvents: (state, action) => {
 			state.filteredEvents = action.payload;
 		},
+		resetSavedEvents: (state, action) => {
+			state.savedEvents = [];
+			state.filteredEvents = [];
+		},
 	},
 });
 
@@ -41,6 +45,7 @@ export const {
 	updateEvent,
 	deleteEvent,
 	setFilteredEvents,
+	resetSavedEvents,
 } = eventSlice.actions;
 
 export const selectSavedEvents = (state: RootStateType) =>

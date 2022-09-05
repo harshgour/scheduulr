@@ -10,9 +10,9 @@ const LabelSelector = (props: Props) => {
 	const dispatch = useDispatch();
 
 	return (
-		<div className='border-t mt-6'>
+		<>
 			{labels.length > 0 && (
-				<>
+				<div className='border-t p-5'>
 					<p className='text-gray-500 font-bold mt-6'>Labels</p>
 					{labels.map((lbl: LabelType, idx: number) => {
 						return (
@@ -40,9 +40,9 @@ const LabelSelector = (props: Props) => {
 							</label>
 						);
 					})}
-				</>
+				</div>
 			)}
-		</div>
+		</>
 	);
 };
 
