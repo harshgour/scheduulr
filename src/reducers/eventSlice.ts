@@ -35,6 +35,7 @@ const eventSlice = createSlice({
 		resetSavedEvents: (state, action) => {
 			state.savedEvents = [];
 			state.filteredEvents = [];
+			localStorage.removeItem("savedEvents");
 		},
 	},
 });
