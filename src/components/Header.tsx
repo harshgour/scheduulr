@@ -90,7 +90,12 @@ const Header = (props: Props) => {
 						</span>
 					</button>
 					<h2 className='mx-2 text-sm sm:text-xl text-gray-500 font-bold'>
-						{dayjs(new Date(dayjs().year(), monthIndex)).format("MMM YYYY")}
+						{dayjs(
+							new Date(
+								dayjs().year(),
+								selectedView === "week" ? currentWeek[0].month() : monthIndex,
+							),
+						).format("MMM YYYY")}
 					</h2>
 				</div>
 				<div className='flex items-center'>

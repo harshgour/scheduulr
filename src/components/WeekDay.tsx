@@ -81,34 +81,32 @@ const WeekDay = (props: Props) => {
 			<div className='flex-1 mt-4 w-full border-r'>
 				<div className='time-rows h-max'>
 					{new Array(12).fill([]).map((item, index) => (
-						<>
-							<div
-								className='p-2 h-[8vh] sm:h-[6.5vh] w-full border-b cursor-pointer flex flex-col sm:flex-row'
-								key={index}
-								onClick={() => handleDayTimeClick(index)}>
-								{props.dayIdx === 0 && (
-									<span className='text-xs text-slate-500 sm:mr-2'>
-										{index + 9 === 12 ? 12 : (index + 9) % 12}{" "}
-										{index < 9 || index === 12 ? "PM" : "AM"}
-									</span>
-								)}
-								{dayEvents.map((event: EventPayload, idx) => {
-									return (
-										Number(event.time) ===
-											(index + 9 === 12 ? 12 : (index + 9) % 12) && (
-											<div
-												key={idx}
-												className={`p-1 mx-1 text-white text-sm rounded flex-1 mb-1 truncate cursor-pointer font-medium ${getLabelColorClass(
-													event.label,
-												)}`}
-												onClick={(e) => handleEventClick(e, event)}>
-												{event.title}
-											</div>
-										)
-									);
-								})}
-							</div>
-						</>
+						<div
+							className='p-2 h-[8vh] sm:h-[6.5vh] w-full border-b cursor-pointer flex flex-col sm:flex-row'
+							key={index}
+							onClick={() => handleDayTimeClick(index)}>
+							{props.dayIdx === 0 && (
+								<span className='text-xs text-slate-500 sm:mr-2'>
+									{index + 9 === 12 ? 12 : (index + 9) % 12}{" "}
+									{index < 9 || index === 12 ? "PM" : "AM"}
+								</span>
+							)}
+							{dayEvents.map((event: EventPayload, idx) => {
+								return (
+									Number(event.time) ===
+										(index + 9 === 12 ? 12 : (index + 9) % 12) && (
+										<div
+											key={idx}
+											className={`p-1 mx-1 text-white text-sm rounded flex-1 mb-1 truncate cursor-pointer font-medium ${getLabelColorClass(
+												event.label,
+											)}`}
+											onClick={(e) => handleEventClick(e, event)}>
+											{event.title}
+										</div>
+									)
+								);
+							})}
+						</div>
 					))}
 				</div>
 			</div>
