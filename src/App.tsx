@@ -50,6 +50,7 @@ const App = (props: Props) => {
 	}, [showEventModal]);
 
 	useEffect(() => {
+		console.log("savedEvents--changed");
 		if (savedEvents) {
 			localStorage.setItem("savedEvents", JSON.stringify(savedEvents));
 		}
