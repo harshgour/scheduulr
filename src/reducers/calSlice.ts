@@ -38,6 +38,7 @@ const appSlice = createSlice({
 		},
 		setSelectedView: (state, action) => {
 			state.selectedView = action.payload;
+			state.daySelected = dayjs().valueOf();
 		},
 	},
 });
