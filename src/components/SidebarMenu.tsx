@@ -21,6 +21,7 @@ const SidebarMenu = (props: Props) => {
 				{menuOptions.map((option, idx) => {
 					return (
 						<li
+							key={idx}
 							className={`px-6 py-3 flex items-center cursor-pointer ${getSelectedItemClasses(
 								option.value,
 							)}`}>
